@@ -3,6 +3,8 @@ const ctx = canvas.getContext('2d');
 
 // Grid size
 const gridSize = 10;
+const mapWidth = 10;
+const mapHeight = 10;
 const rows = canvas.height / gridSize;
 const cols = canvas.width / gridSize;
 
@@ -27,25 +29,19 @@ let playerAngle = Math.PI / 4;  // 45 degrees
 
 // Raycasting constants
 const fov = Math.PI / 3;  // Field of view (60 degrees)
-const numRays = canvas.width / 2;  // Number of rays cast (width of canvas)
+const numRays = 200;  // Number of rays cast (width of canvas)
 const maxDist = 1000;  // Maximum ray distance
 
-// Draw the map and the player
+// Draw the map
 function drawMap() {
-    for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
+    for (let y = 0; y < mapHeight; y++) {
+        for (let x = 0; x < mapWidth; x++) {
             if (map[y][x] === 1) {
                 ctx.fillStyle = 'gray';
                 ctx.fillRect(x * gridSize, y * gridSize, gridSize, gridSize);
             }
         }
     }
-
-    // Draw the player
-    ctx.fillStyle = 'red';
-    ctx.beginPath();
-    ctx.arc(playerX, playerY, 5, 0, Math.PI * 2);
-    ctx.fill();
 }
 
 // Cast a single ray
@@ -76,7 +72,7 @@ function castRay(angle) {
     return maxDist;
 }
 
-// Draw the rays (view frustum)
+// Draw the rays
 function drawRays() {
     let startAngle = playerAngle - fov / 2;
 
@@ -88,7 +84,9 @@ function drawRays() {
         let wallWidth = canvas.width / numRays;
 
         // Set the color based on distance
-        ctx.fillStyle = `hsl(${(distance % 360)}, 100%, 50%)`;
+        let color = 255 - Math.min(distance, 255);
+        ctx.fillStyle = `rgb(${color}, ${color}, ${color})`;
+
         ctx.fillRect(i * wallWidth, (canvas.height - wallHeight) / 2, wallWidth, wallHeight);
 
         // Increment the angle for the next ray
