@@ -3,142 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raycaster in JavaScript</title>
+    <title>2D Ray Caster</title>
     <style>
-        body, html { margin: 0; padding: 0; overflow: hidden; }
-        canvas { display: block; background: #f0f0f0; }
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #222;
+        }
+        canvas {
+            border: 1px solid #fff;
+        }
     </style>
 </head>
 <body>
-<canvas id="raycasterCanvas"></canvas>
-<script>
-    // Setup canvas
-    const canvas = document.getElementById("raycasterCanvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    // Player's position and rotation
-    const player = { x: canvas.width / 2, y: canvas.height / 2, angle: Math.PI / 4 };
-
-    // Simple map with walls (1 = wall, 0 = empty space)
-    const map = [
-        [1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0, 1],
-        [1, 0, 1, 1, 0, 1],
-        [1, 0, 0, 1, 0, 1],
-        [1, 1, 1, 1, 0, 1],
-        [1, 1, 1, 1, 1, 1]
-    ];
-
-    const mapSize = 64; // Size of each grid cell (in pixels)
-
-    // Raycasting settings
-    const numRays = 360; // Number of rays to cast (one for each degree)
-    const maxDistance = 800; // Max distance a ray can travel
-    const fov = Math.PI / 3; // Field of view (60 degrees)
-
-    // Draw function
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Draw the map
-        drawMap();
-
-        // Cast rays
-        castRays();
-    }
-
-    // Draw the map (simple grid with walls)
-    function drawMap() {
-        for (let y = 0; y < map.length; y++) {
-            for (let x = 0; x < map[y].length; x++) {
-                if (map[y][x] === 1) {
-                    ctx.fillStyle = "#333"; // Wall color
-                    ctx.fillRect(x * mapSize, y * mapSize, mapSize, mapSize);
-                }
-            }
-        }
-    }
-
-    // Cast rays from the player
-    function castRays() {
-        for (let i = 0; i < numRays; i++) {
-            let rayAngle = player.angle - fov / 2 + (i * fov) / numRays;
-            let distance = castSingleRay(rayAngle);
-            drawRay(rayAngle, distance, i);
-        }
-    }
-
-    // Cast a single ray and return the distance to the wall
-    function castSingleRay(rayAngle) {
-        let rayX = player.x;
-        let rayY = player.y;
-        let deltaX = Math.cos(rayAngle);
-        let deltaY = Math.sin(rayAngle);
-
-        let distance = 0;
-
-        while (distance < maxDistance) {
-            rayX += deltaX;
-            rayY += deltaY;
-            distance++;
-
-            // Check if the ray hits a wall
-            if (isWall(Math.floor(rayX / mapSize), Math.floor(rayY / mapSize))) {
-                return distance;
-            }
-        }
-        return maxDistance;
-    }
-
-    // Check if the ray hits a wall in the map
-    function isWall(gridX, gridY) {
-        if (gridX < 0 || gridX >= map[0].length || gridY < 0 || gridY >= map.length) {
-            return false;
-        }
-        return map[gridY][gridX] === 1;
-    }
-
-    // Draw the rays
-    function drawRay(rayAngle, distance, index) {
-        const rayLength = distance;
-        const scale = canvas.height / (2 * rayLength); // Basic shading
-        const color = `rgb(${Math.min(255, 255 / (rayLength / 100))}, 0, 0)`; // Color based on distance
-
-        const x = index * (canvas.width / numRays); // X position for each vertical line
-        const height = Math.min(canvas.height, scale * 10);
-
-        ctx.fillStyle = color;
-        ctx.fillRect(x, canvas.height / 2 - height / 2, (canvas.width / numRays), height);
-    }
-
-    // Handle player movement (WASD to move, Arrow keys to rotate)
-    document.addEventListener("keydown", function (event) {
-        const speed = 5;
-        const rotationSpeed = Math.PI / 180 * 5;
-
-        switch (event.key) {
-            case "w": // Move forward
-                player.x += Math.cos(player.angle) * speed;
-                player.y += Math.sin(player.angle) * speed;
-                break;
-            case "s": // Move backward
-                player.x -= Math.cos(player.angle) * speed;
-                player.y -= Math.sin(player.angle) * speed;
-                break;
-            case "a": // Rotate left
-                player.angle -= rotationSpeed;
-                break;
-            case "d": // Rotate right
-                player.angle += rotationSpeed;
-                break;
-        }
-        draw();
-    });
-
-    // Initial render
-    draw();
-</script>
+    <canvas id="raycaster" width="800" height="600"></canvas>
+    <script src="raycaster.js"></script>
 </body>
 </html>
