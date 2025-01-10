@@ -15,8 +15,6 @@ var s = false
 var a = false
 var d = false
 
-var xmov = 0
-var ymov = 0
 var xpos = 50
 var ypos = 50
 
@@ -25,36 +23,36 @@ var winHeight = window.innerHeight
 canvas.width = winWidth
 canvas.height = winHeight
 
-var rot = 0.02 // Angle of rotation
+var rot = 0.0 // Initial rotation
 var playerSpeed = 2; // Movement speed
 
 function main() {
     ctx.clearRect(0, 0, winWidth, winHeight)
 
-    // Draw map
+    // Draw the map
     for (let i = 0; i < map.length; i++) {
         for (let j = 0; j < map[i].length; j++) {
             if (map[i][j] == 1) {
-                fullRect(j * 50, i * 50, 50, 50)
+                fullRect(j * 50, i * 50, 50, 50) // Draw walls
             } else {
-                rect(j * 50, i * 50, 50, 50)
+                rect(j * 50, i * 50, 50, 50) // Draw empty spaces
             }
         }
     }
 
-    player(xpos + xmov, ypos + ymov) // Draw player
+    player(xpos, ypos) // Draw the player
     
-    handleMovement(); // Update player movement based on direction
+    handleMovement() // Update player movement based on direction
 
-    direction() // Draw player's direction line
+    direction() // Draw the player's direction line
 
-    requestAnimationFrame(main)
+    requestAnimationFrame(main) // Main game loop
 }
 
 function direction() {
-    // Draw the direction line
-    var posx = xpos + xmov
-    var posy = ypos + ymov
+    // Draw the direction line where the player is facing
+    var posx = xpos
+    var posy = ypos
     var xnew = 50
     var ynew = 50
     var newx = xnew * Math.cos(rot) - ynew * Math.sin(rot)
@@ -62,21 +60,21 @@ function direction() {
 
     line(posx, posy, posx + newx, posy + newy)
 
-    // Rotate player
+    // Handle rotation with A and D keys
     if (a == true) {
-        rot -= 0.04
+        rot -= 0.04 // Rotate left
     }
     if (d == true) {
-        rot += 0.04
+        rot += 0.04 // Rotate right
     }
 }
 
-// Calculate the next position based on movement
+// Handle movement based on the player's direction
 function handleMovement() {
     var nextX = xpos
     var nextY = ypos
 
-    if (w == true) { // Move forward
+    if (w == true) { // Move forward in the direction of the line
         nextX += playerSpeed * Math.cos(rot)
         nextY += playerSpeed * Math.sin(rot)
     }
@@ -85,7 +83,7 @@ function handleMovement() {
         nextY -= playerSpeed * Math.sin(rot)
     }
 
-    // Check if the next position collides with walls
+    // Check if the new position collides with walls
     if (!checkCollision(nextX, nextY)) {
         xpos = nextX
         ypos = nextY
@@ -97,6 +95,7 @@ function checkCollision(nextX, nextY) {
     var gridX = Math.floor(nextX / 50)
     var gridY = Math.floor(nextY / 50)
 
+    // Check if the player is about to move into a wall
     if (map[gridY][gridX] == 1) {
         return true // Collides with a wall
     }
