@@ -1,105 +1,134 @@
-const canvas = document.getElementById('raycaster');
-const ctx = canvas.getContext('2d');
+// Kens code
+// Global Variables
+const canvas = document.getElementById('canvas')
+const ctx = canvas.getContext('2d')
 
-// Grid size
-const gridSize = 10;
-const mapWidth = 10;
-const mapHeight = 10;
-const rows = canvas.height / gridSize;
-const cols = canvas.width / gridSize;
+var map = [
+    [1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 1],
+    [1, 0, 1, 0, 1],
+    [1, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1]
+]
 
-// Map (1 = wall, 0 = empty space)
-const map = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 0, 1, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
-    [1, 0, 1, 0, 1, 0, 1, 0, 0, 1],
-    [1, 0, 1, 0, 0, 0, 1, 1, 1, 1],
-    [1, 0, 1, 0, 1, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 1, 1, 0, 1],
-    [1, 0, 1, 0, 0, 0, 0, 0, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-];
+var w = false
+var s = false
+var a = false
+var d = false
 
-// Player position and angle
-let playerX = 200;
-let playerY = 200;
-let playerAngle = Math.PI / 4;  // 45 degrees
+var xmov = 0
+var ymov = 0
+var xpos = 50
+var ypos = 50
 
-// Raycasting constants
-const fov = Math.PI / 3;  // Field of view (60 degrees)
-const numRays = 200;  // Number of rays cast (width of canvas)
-const maxDist = 1000;  // Maximum ray distance
+var winWidth = window.innerWidth
+var winHeight = window.innerHeight
+canvas.width = winWidth
+canvas.height = winHeight
 
-// Draw the map
-function drawMap() {
-    for (let y = 0; y < mapHeight; y++) {
-        for (let x = 0; x < mapWidth; x++) {
-            if (map[y][x] === 1) {
-                ctx.fillStyle = 'gray';
-                ctx.fillRect(x * gridSize, y * gridSize, gridSize, gridSize);
+var rot = 0.02 
+function main() {
+    ctx.clearRect(0, 0, winWidth, winHeight)
+
+    for (let i = 0; i < map.length; i++) {
+        for (let j = 0; j < map[i].length; j++) {
+            if (map[i][j] == 1) {
+                fullRect(j * 50, i * 50, 50, 50)
+            } else {
+                rect(j * 50, i * 50, 50, 50)
             }
+            
         }
     }
-}
-
-// Cast a single ray
-function castRay(angle) {
-    let rayX = playerX;
-    let rayY = playerY;
-
-    let sinA = Math.sin(angle);
-    let cosA = Math.cos(angle);
-
-    // Step size for ray traversal
-    let stepSize = 5;
-
-    // Step through the grid until a collision is found
-    for (let dist = 0; dist < maxDist; dist += stepSize) {
-        rayX += cosA * stepSize;
-        rayY += sinA * stepSize;
-
-        // Convert to grid coordinates
-        const gridX = Math.floor(rayX / gridSize);
-        const gridY = Math.floor(rayY / gridSize);
-
-        if (map[gridY] && map[gridY][gridX] === 1) {
-            return dist;
-        }
+    player(xpos + xmov, ypos + ymov)
+    
+    if (w == true) {
+        ymov -= 1
+    }
+    if (s == true) {
+        ymov += 1
     }
 
-    return maxDist;
+
+    direction()
+    requestAnimationFrame(main)
 }
 
-// Draw the rays
-function drawRays() {
-    let startAngle = playerAngle - fov / 2;
+function direction() {
+    var posx = xpos + xmov
+    var posy = ypos + ymov
+    var xnew = 50
+    var ynew = 50
+    var newx =  xnew * (Math.cos(rot)) - ynew * (Math.sin(rot))
+    var newy = xnew * (Math.sin(rot)) + ynew * (Math.cos(rot))
 
-    for (let i = 0; i < numRays; i++) {
-        let distance = castRay(startAngle);
-        
-        // Calculate the height of the wall slice based on distance
-        let wallHeight = (canvas.height / distance) * 100;
-        let wallWidth = canvas.width / numRays;
-
-        // Set the color based on distance
-        let color = 255 - Math.min(distance, 255);
-        ctx.fillStyle = `rgb(${color}, ${color}, ${color})`;
-
-        ctx.fillRect(i * wallWidth, (canvas.height - wallHeight) / 2, wallWidth, wallHeight);
-
-        // Increment the angle for the next ray
-        startAngle += fov / numRays;
+    line(posx, posy, posx+newx, posy+newy)
+    if (a == true) {
+        rot -= 0.04
+    }
+    if (d == true) {
+        rot += 0.04
     }
 }
 
-// Game loop
-function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawMap();
-    drawRays();
-    requestAnimationFrame(gameLoop);
+function line(x1, y1, x2, y2) {
+    ctx.beginPath()
+    ctx.moveTo(x1, y1)
+    ctx.lineTo(x2, y2)
+    ctx.lineWidth = 2
+    ctx.stroke()
 }
 
-gameLoop();
+function rect(x, y, width, height) {
+    ctx.rect(x, y, width, height)
+    ctx.strokeStyle = 'black'
+    ctx.stroke()
+}
+
+function fullRect(x, y, width, height) {
+    ctx.fillRect(x, y, width, height)
+
+    
+}
+
+document.body.addEventListener('keydown', (event) => {
+    if (event.key === 'w') {
+        w = true
+    }
+    if (event.key === 's') {
+        s = true
+    }
+    if (event.key === 'a') {
+        a = true
+    }
+    if (event.key === 'd') {
+        d = true
+    }
+})
+
+document.body.addEventListener('keyup', (event) => {
+    if (event.key === 'w') {
+        w = false
+    }
+    if (event.key === 's') {
+        s = false
+    }
+    if (event.key === 'a') {
+        a = false
+    }
+    if (event.key === 'd') {
+        d = false
+    }
+})
+
+function player(x, y) {
+    ctx.beginPath()
+    ctx.arc(x, y, 8, 0, 2 * Math.PI)
+    ctx.fillStyle = 'red'
+    ctx.fill()
+
+}
+
+
+
+requestAnimationFrame(main)
