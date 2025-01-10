@@ -41,15 +41,7 @@ function main() {
         }
     }
     player(xpos + xmov, ypos + ymov)
-    
-    if (w == true) {
-        ymov -= 1
-    }
-    if (s == true) {
-        ymov += 1
-    }
-
-
+    movement()
     direction()
     requestAnimationFrame(main)
 }
@@ -68,6 +60,35 @@ function direction() {
     }
     if (d == true) {
         rot += 0.04
+    }
+}
+
+function checkCollision(nextX, nextY) {
+    var gridX = Math.floor(nextX / 50)
+    var gridY = Math.floor(nextY / 50)
+
+    if (map[gridY][gridX] == 1) {
+        return true // Collides with a wall
+    }
+    return false // No collision
+}
+
+function movement() {
+    var nextX = xmov
+    var nextY = ymov
+
+    if (w == true) {
+        nextX += 2 * Math.cos(rot)
+        nextY += 2 * Math.sin(rot)
+    }
+    if (w == true) {
+        nextX -= 2 * Math.cos(rot)
+        nextY -= 2 * Math.sin(rot)
+    }
+
+    if (!checkCollision(nextX, nextY)) {
+        xmov = nextX
+        ymov = nextY
     }
 }
 
