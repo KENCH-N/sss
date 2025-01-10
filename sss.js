@@ -18,8 +18,8 @@ var d = false
 
 var xmov = 0
 var ymov = 0
-var xpos = 50
-var ypos = 50
+var xpos = 75
+var ypos = 75
 
 var winWidth = window.innerWidth
 var winHeight = window.innerHeight
