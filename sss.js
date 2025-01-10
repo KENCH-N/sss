@@ -1,4 +1,3 @@
-// Kens code
 // Global Variables
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
@@ -18,18 +17,21 @@ var d = false
 
 var xmov = 0
 var ymov = 0
-var xpos = 75
-var ypos = 75
+var xpos = 50
+var ypos = 50
 
 var winWidth = window.innerWidth
 var winHeight = window.innerHeight
 canvas.width = winWidth
 canvas.height = winHeight
 
-var rot = 0.02 
+var rot = 0.02 // Angle of rotation
+var playerSpeed = 2; // Movement speed
+
 function main() {
     ctx.clearRect(0, 0, winWidth, winHeight)
 
+    // Draw map
     for (let i = 0; i < map.length; i++) {
         for (let j = 0; j < map[i].length; j++) {
             if (map[i][j] == 1) {
@@ -37,24 +39,30 @@ function main() {
             } else {
                 rect(j * 50, i * 50, 50, 50)
             }
-            
         }
     }
-    player(xpos + xmov, ypos + ymov)
-    movement()
-    direction()
+
+    player(xpos + xmov, ypos + ymov) // Draw player
+    
+    handleMovement(); // Update player movement based on direction
+
+    direction() // Draw player's direction line
+
     requestAnimationFrame(main)
 }
 
 function direction() {
+    // Draw the direction line
     var posx = xpos + xmov
     var posy = ypos + ymov
     var xnew = 50
     var ynew = 50
-    var newx =  xnew * (Math.cos(rot)) - ynew * (Math.sin(rot))
-    var newy = xnew * (Math.sin(rot)) + ynew * (Math.cos(rot))
+    var newx = xnew * Math.cos(rot) - ynew * Math.sin(rot)
+    var newy = xnew * Math.sin(rot) + ynew * Math.cos(rot)
 
-    line(posx, posy, posx+newx, posy+newy)
+    line(posx, posy, posx + newx, posy + newy)
+
+    // Rotate player
     if (a == true) {
         rot -= 0.04
     }
@@ -63,6 +71,28 @@ function direction() {
     }
 }
 
+// Calculate the next position based on movement
+function handleMovement() {
+    var nextX = xpos
+    var nextY = ypos
+
+    if (w == true) { // Move forward
+        nextX += playerSpeed * Math.cos(rot)
+        nextY += playerSpeed * Math.sin(rot)
+    }
+    if (s == true) { // Move backward
+        nextX -= playerSpeed * Math.cos(rot)
+        nextY -= playerSpeed * Math.sin(rot)
+    }
+
+    // Check if the next position collides with walls
+    if (!checkCollision(nextX, nextY)) {
+        xpos = nextX
+        ypos = nextY
+    }
+}
+
+// Collision detection
 function checkCollision(nextX, nextY) {
     var gridX = Math.floor(nextX / 50)
     var gridY = Math.floor(nextY / 50)
@@ -73,24 +103,7 @@ function checkCollision(nextX, nextY) {
     return false // No collision
 }
 
-function movement() {
-    var nextX = xmov
-    var nextY = ymov
-
-    if (w == true) {
-        nextX += 2 * Math.cos(rot)
-        nextY += 2 * Math.sin(rot)
-    }
-    if (w == true) {
-        nextX -= 2 * Math.cos(rot)
-        nextY -= 2 * Math.sin(rot)
-    }
-
-    if (!checkCollision(nextX, nextY)) {
-        xmov = nextX
-        ymov = nextY
-    }
-}
+// Utility functions
 
 function line(x1, y1, x2, y2) {
     ctx.beginPath()
@@ -108,8 +121,6 @@ function rect(x, y, width, height) {
 
 function fullRect(x, y, width, height) {
     ctx.fillRect(x, y, width, height)
-
-    
 }
 
 document.body.addEventListener('keydown', (event) => {
@@ -147,9 +158,6 @@ function player(x, y) {
     ctx.arc(x, y, 8, 0, 2 * Math.PI)
     ctx.fillStyle = 'red'
     ctx.fill()
-
 }
-
-
 
 requestAnimationFrame(main)
